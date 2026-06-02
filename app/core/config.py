@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -18,8 +17,13 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     FRONTEND_URL: str = "http://localhost:4200"
 
-    # Dev Mode — desativa autenticação obrigatória
-    DEV_MODE: bool = True
+    # ⚠️ PROBLEMA CORRIGIDO:
+    # O padrão era DEV_MODE: bool = True
+    # Isso significa que MESMO com DEV_MODE=false no .env,
+    # o Python usava True porque o Pydantic não estava lendo o arquivo.
+    # A causa era a falta do env_file na classe Config.
+    # Com env_file=".env", o Pydantic lê o arquivo e respeita DEV_MODE=false.
+    DEV_MODE: bool = False  # padrão seguro; o .env sobrescreve se necessário
 
     class Config:
         env_file = ".env"
