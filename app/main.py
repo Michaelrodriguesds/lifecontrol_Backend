@@ -24,16 +24,34 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — permitir frontend Angular
+# ─── CORS ────────────────────────────────────────────────────────────────────
+# Lista de origens permitidas:
+# - A URL do frontend definida na variável de ambiente FRONTEND_URL
+# - Desenvolvimento local
+# - Qualquer subdomínio do Render (cobre variações de nome do serviço)
+#
+# IMPORTANTE: a variável FRONTEND_URL no Render deve ser exatamente:
+#   https://lifecontrol-front.onrender.com   (sem barra no final)
+allowed_origins = [
+    settings.FRONTEND_URL,                      # variável de ambiente do Render
+    "http://localhost:4200",                     # dev local
+    "http://localhost:3000",                     # dev local alternativo
+]
+
+# Remove entradas vazias caso FRONTEND_URL não esteja configurada
+allowed_origins = [o for o in allowed_origins if o]
+
+logger.info(f"CORS allowed origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:4200"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Registrar routers
+# ─── Routers ─────────────────────────────────────────────────────────────────
 app.include_router(auth.router)
 app.include_router(goals.router)
 app.include_router(expenses.router)
@@ -50,6 +68,8 @@ async def root():
         "version": "1.0.0",
         "dev_mode": settings.DEV_MODE,
         "docs": "/docs",
+        # Mostra as origens permitidas para facilitar debug
+        "cors_origins": allowed_origins,
     }
 
 
