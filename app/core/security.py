@@ -1,18 +1,29 @@
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from app.core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ⚠️ PROBLEMA CORRIGIDO:
+# passlib + bcrypt tem um bug de compatibilidade com Python 3.12 no Render.
+# Erro: "ValueError: password cannot be longer than 72 bytes"
+# Ele aparece durante a inicialização interna do passlib, não pela sua senha.
+# Solução: usar a biblioteca bcrypt diretamente, sem passlib como intermediário.
+import bcrypt
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # bcrypt.checkpw compara a senha digitada com o hash salvo no banco
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"),
+        hashed_password.encode("utf-8")
+    )
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    # gensalt() gera um salt aleatório (rounds=12 é o padrão seguro)
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed.decode("utf-8")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
