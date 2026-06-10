@@ -23,13 +23,15 @@ async def connect_to_mongo():
         from app.models.future_expense import FutureExpense
         from app.models.note import Note
         from app.models.category import Category
+        from app.models.work_day import WorkDay   # ← novo modelo
 
         await init_beanie(
             database=client[settings.DATABASE_NAME],
             document_models=[
                 User, Goal, GoalTransaction,
                 Item, Expense, FutureExpense,
-                Note, Category
+                Note, Category,
+                WorkDay,   # ← registrar no Beanie
             ]
         )
         logger.info(f"✅ Conectado ao MongoDB: {settings.DATABASE_NAME}")

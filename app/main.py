@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
-from app.routers import auth, goals, expenses, items, future_expenses, notes, analytics
+from app.routers import auth, goals, expenses, items, future_expenses, notes, analytics,work
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -59,6 +59,7 @@ app.include_router(items.router)
 app.include_router(future_expenses.router)
 app.include_router(notes.router)
 app.include_router(analytics.router)
+app.include_router(work.router)   # ← novo router Mercado Livre
 
 
 @app.get("/")
